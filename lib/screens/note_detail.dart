@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:sql_trial/models/note.dart';
 import 'package:sql_trial/utils/database_helper.dart';
-import 'package:intl/intl.dart';
 
 class NoteDetail extends StatefulWidget {
   final String appBarTitle;
@@ -20,18 +18,7 @@ class NoteDetail extends StatefulWidget {
 }
 
 class NoteDetailState extends State<NoteDetail> {
-  File _image;
-
-  Future getImage() async {
-    var image = await ImagePicker.pickImage(
-        source: ImageSource.gallery, maxHeight: 800, maxWidth: 800);
-
-    setState(() {
-      _image = image;
-    });
-  }
-
-  static var _priorities = ['High', 'Low'];
+  static var _priorities = ['Current', 'Savings', 'Salary'];
 
   DatabaseHelper helper = DatabaseHelper();
 
@@ -40,61 +27,16 @@ class NoteDetailState extends State<NoteDetail> {
 
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
-  TextEditingController pathController = TextEditingController();
+  TextEditingController curencyController = TextEditingController();
+  TextEditingController insertDateController = TextEditingController();
+  TextEditingController updateDateController = TextEditingController();
+  TextEditingController amountController = TextEditingController();
+  TextEditingController taxesController = TextEditingController();
 
   NoteDetailState(this.note, this.appBarTitle);
 
   @override
   Widget build(BuildContext context) {
-    var container = Container(
-        height: 257,
-        width: 400,
-        child: _image == null
-            ? DecoratedBox(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    GestureDetector(
-                      child: Icon(
-                        Icons.camera,
-                        size: 50.0,
-                        color: Colors.black,
-                      ),
-                      onTap: getImage,
-                    ),
-                    Divider(
-                      color: Colors.white,
-                      height: 5.0,
-                    ),
-                    Text(
-                      "Upload Recipe Pic !",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.0,
-                      ),
-                    )
-                  ],
-                ),
-                decoration:
-                    BoxDecoration(border: Border.all(style: BorderStyle.solid)),
-              )
-            : DecoratedBox(
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                      height: 257,
-                      width: 400,
-                      child: Image.file(
-                        _image,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  ],
-                ),
-                decoration:
-                    BoxDecoration(border: Border.all(style: BorderStyle.solid)),
-              ));
-
     TextStyle textStyle = Theme.of(context).textTheme.title;
 
     titleController.text = note.title;
@@ -120,25 +62,7 @@ class NoteDetailState extends State<NoteDetail> {
             child: ListView(
               children: <Widget>[
                 // First element
-                ListTile(
-                  title: DropdownButton(
-                      items: _priorities.map((String dropDownStringItem) {
-                        return DropdownMenuItem<String>(
-                          value: dropDownStringItem,
-                          child: Text(dropDownStringItem),
-                        );
-                      }).toList(),
-                      style: textStyle,
-                      value: getPriorityAsString(note.priority),
-                      onChanged: (valueSelectedByUser) {
-                        setState(() {
-                          debugPrint('User selected $valueSelectedByUser');
-                          updatePriorityAsInt(valueSelectedByUser);
-                        });
-                      }),
-                ),
 
-                // Second Element
                 Padding(
                   padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
                   child: TextField(
@@ -149,14 +73,14 @@ class NoteDetailState extends State<NoteDetail> {
                       updateTitle();
                     },
                     decoration: InputDecoration(
-                        labelText: 'Title',
+                        labelText: 'Bank Name',
                         labelStyle: textStyle,
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(5.0))),
                   ),
                 ),
 
-                // Third Element
+                // Second Element
                 Padding(
                   padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
                   child: TextField(
@@ -167,20 +91,91 @@ class NoteDetailState extends State<NoteDetail> {
                       updateDescription();
                     },
                     decoration: InputDecoration(
-                        labelText: 'Description',
+                        labelText: 'Address',
                         labelStyle: textStyle,
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(5.0))),
                   ),
                 ),
 
-                //Fourth Element
-                Padding(
-                  padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
-                  child: container,
+                //Third Element
+                ListTile(
+                  title: DropdownButton(
+                      items: _priorities.map((String dropDownStringItem) {
+                        return DropdownMenuItem<String>(
+                          value: dropDownStringItem,
+                          child: Text(dropDownStringItem),
+                        );
+                      }).toList(),
+                      style: textStyle,
+                      value: getPriorityAsString(note.accountType),
+                      onChanged: (valueSelectedByUser) {
+                        setState(() {
+                          debugPrint('User selected $valueSelectedByUser');
+                          updatePriorityAsInt(valueSelectedByUser);
+                        });
+                      }),
                 ),
 
-                // Fifth Element
+                // Fourth Element
+
+                Padding(
+                  padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+                  child: TextField(
+                    controller: curencyController,
+                    style: textStyle,
+                    onChanged: (value) {
+                      debugPrint('Something changed in currency Text Field');
+                      updateCurrency();
+                    },
+                    decoration: InputDecoration(
+                        labelText: 'Currency',
+                        labelStyle: textStyle,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5.0))),
+                  ),
+                ),
+
+                //Fifth Element
+                //Its the date and time when inserted or updated
+
+                //Sixth Elemnet
+                Padding(
+                  padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: amountController,
+                    style: textStyle,
+                    onChanged: (value) {
+                      debugPrint('Something changed in amount Text Field');
+                      updateAmount();
+                    },
+                    decoration: InputDecoration(
+                        labelText: 'Amount',
+                        labelStyle: textStyle,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5.0))),
+                  ),
+                ),
+                //Seventh Element
+                Padding(
+                  padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: taxesController,
+                    style: textStyle,
+                    onChanged: (value) {
+                      debugPrint('Something changed in taxed Text Field');
+                      updateTaxes();
+                    },
+                    decoration: InputDecoration(
+                        labelText: 'Taxes',
+                        labelStyle: textStyle,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5.0))),
+                  ),
+                ),
+
                 Padding(
                   padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
                   child: Row(
@@ -236,24 +231,30 @@ class NoteDetailState extends State<NoteDetail> {
   // Convert the String priority in the form of integer before saving it to Database
   void updatePriorityAsInt(String value) {
     switch (value) {
-      case 'High':
-        note.priority = 1;
+      case 'Current':
+        note.accountType = "Current";
         break;
-      case 'Low':
-        note.priority = 2;
+      case 'Savings':
+        note.accountType = "Savings";
+        break;
+      case 'Salary':
+        note.accountType = "Salary";
         break;
     }
   }
 
   // Convert int priority to String priority and display it to user in DropDown
-  String getPriorityAsString(int value) {
+  String getPriorityAsString(String value) {
     String priority;
     switch (value) {
-      case 1:
+      case "Current":
         priority = _priorities[0]; // 'High'
         break;
-      case 2:
+      case "Savings":
         priority = _priorities[1]; // 'Low'
+        break;
+      case "Salary":
+        priority = _priorities[2]; // 'Low'
         break;
     }
     return priority;
@@ -269,31 +270,42 @@ class NoteDetailState extends State<NoteDetail> {
     note.description = descriptionController.text;
   }
 
-  void updatePath() {
-    note.path = pathController.text;
+  void updateCurrency() {
+    note.currency = curencyController.text;
+    note.insertDate = DateTime.now().toString();
+    note.updateDate = DateTime.now().toString();
+    //we need a logic when its first tie its need toinserate or else updating date time shoukd go inside this
+  }
+
+  void updateAmount() {
+    note.amount = amountController.text;
+  }
+
+  void updateTaxes() {
+    note.taxes = taxesController.text;
   }
 
   // Save data to database
   void _save() async {
-
-
-      String base64Image = base64Encode(_image.readAsBytesSync());
-    note.path=base64Image;
-    print("Base64: "+base64Image);
-
-
-    moveToLastScreen();
-
-    note.date = DateFormat.yMMMd().format(DateTime.now());
     int result;
     if (note.id != null) {
       // Case 1: Update operation
+
       result = await helper.updateNote(note);
     } else {
+      showDialog(
+          context: context,
+          builder: (context) => Center(
+                child: CircularProgressIndicator(),
+              ));
       // Case 2: Insert Operation
-      result = await helper.insertNote(note);
+      for (int i = 1; i <= 100; i++) {
+        print(i);
+        result = await helper.insertNote(note);
+      }
+      Navigator.pop(context, true);
+      moveToLastScreen();
     }
-
     if (result != 0) {
       // Success
       _showAlertDialog('Status', 'Note Saved Successfully');

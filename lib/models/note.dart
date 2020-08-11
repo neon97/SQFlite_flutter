@@ -1,27 +1,46 @@
 class Note {
+  ////id, account_type, title, description, currency, amount, taxes, insert_date, update_date
   int _id;
+  String _accountType;
   String _title;
-  String _path;
   String _description;
-  String _date;
-  int _priority;
+  String _currency;
+  String _insertDate;
+  String _updateDate;
+  String _amount;
+  String _taxes;
 
-  Note(this._title, this._date, this._path, this._priority, [this._description]);
+  Note(
+    this._title,
+    this._accountType,
+    this._currency,
+    this._description,
+    this._insertDate,
+    this._updateDate,
+    this._amount,
+    this._taxes,
+  );
 
-  Note.withId(this._id, this._title, this._path, this._date, this._priority,
-      [this._description]);
+  Note.withId(
+      this._id,
+      this._title,
+      this._accountType,
+      this._amount,
+      this._currency,
+      this._description,
+      this._insertDate,
+      this._taxes,
+      this._updateDate);
 
   int get id => _id;
-
   String get title => _title;
-
-  String get path => _path;
-
+  String get accountType => _accountType;
   String get description => _description;
-
-  int get priority => _priority;
-
-  String get date => _date;
+  String get currency => _currency;
+  String get insertDate => _insertDate;
+  String get updateDate => _updateDate;
+  String get amount => _amount;
+  String get taxes => _taxes;
 
   set title(String newTitle) {
     if (newTitle.length <= 255) {
@@ -35,18 +54,28 @@ class Note {
     }
   }
 
-  set priority(int newPriority) {
-    if (newPriority >= 1 && newPriority <= 2) {
-      this._priority = newPriority;
-    }
+  set accountType(String newAccountType) {
+    this._accountType = newAccountType;
   }
 
-  set date(String newDate) {
-    this._date = newDate;
+  set currency(String newCurrency) {
+    this._currency = newCurrency;
   }
 
-    set path(String newpath) {
-    this._path = newpath;
+  set amount(String newAmount) {
+    this._amount = newAmount;
+  }
+
+  set taxes(String newTaxes) {
+    this._taxes = newTaxes;
+  }
+
+  set insertDate(String newInsertDate) {
+    this._insertDate = newInsertDate;
+  }
+
+  set updateDate(String newUpdateDate) {
+    this._updateDate = newUpdateDate;
   }
 
   // Convert a Note object into a Map object
@@ -56,10 +85,13 @@ class Note {
       map['id'] = _id;
     }
     map['title'] = _title;
+    map['accountType'] = _accountType;
     map['description'] = _description;
-    map['path'] = _path;
-    map['priority'] = _priority;
-    map['date'] = _date;
+    map['currency'] = _currency;
+    map['insertDate'] = _insertDate;
+    map['updateDate'] = _updateDate;
+    map['amount'] = _amount;
+    map['taxes'] = _taxes;
 
     return map;
   }
@@ -68,9 +100,12 @@ class Note {
   Note.fromMapObject(Map<String, dynamic> map) {
     this._id = map['id'];
     this._title = map['title'];
+    this._accountType = map['accountType'];
     this._description = map['description'];
-    this._path = map['path'];
-    this._priority = map['priority'];
-    this._date = map['date'];
+    this._currency = map['currency'];
+    this._insertDate = map['insertDate'];
+    this._updateDate = map['updateDate'];
+    this._amount = map['amount'];
+    this._taxes = map['taxes'];
   }
 }
