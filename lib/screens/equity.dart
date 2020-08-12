@@ -1,9 +1,113 @@
 import 'dart:async';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:sql_trial/models/note.dart';
-import 'package:sql_trial/utils/database_helper.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sql_trial/utils/equity_database.dart';
+
+class EquityList extends StatefulWidget {
+  final String appTitle;
+  EquityList({this.appTitle});
+  @override
+  State<StatefulWidget> createState() {
+    return EquityListState();
+  }
+}
+
+class EquityListState extends State<EquityList> {
+  DatabaseEquity databaseHelper = DatabaseEquity();
+  List<Note> noteList;
+  int count = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    if (noteList == null) {
+      noteList = List<Note>();
+      updateListView();
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("${widget.appTitle} ${this.noteList.length} Data"),
+      ),
+      body: getNoteListView(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          debugPrint('FAB clicked');
+          navigateToDetail(
+              Note('', '', '', '', '', '', '', ''), 'Add ${widget.appTitle}');
+        },
+        tooltip: 'Banks Account',
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+
+  ListView getNoteListView() {
+    TextStyle titleStyle = Theme.of(context).textTheme.subhead;
+
+    return ListView.builder(
+      itemCount: count,
+      itemBuilder: (BuildContext context, int position) {
+        return ListTile(
+          title: Text("Bank : " + this.noteList[position].title),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text("Account Type : " + this.noteList[position].accountType),
+              Text("Add : " + this.noteList[position].description),
+              Text("Balance : " +
+                  this.noteList[position].currency +
+                  " " +
+                  this.noteList[position].amount),
+              Text("Tax : " + this.noteList[position].taxes),
+              Divider(
+                color: Colors.black,
+                height: 10.0,
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _delete(BuildContext context, Note note) async {
+    int result = await databaseHelper.deleteNote(note.id);
+    if (result != 0) {
+      _showSnackBar(context, 'Note Deleted Successfully');
+      updateListView();
+    }
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    final snackBar = SnackBar(content: Text(message));
+    Scaffold.of(context).showSnackBar(snackBar);
+  }
+
+  void navigateToDetail(Note note, String title) async {
+    bool result =
+        await Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return NoteDetail(note, title);
+    }));
+
+    if (result == true) {
+      updateListView();
+    }
+  }
+
+  void updateListView() {
+    final Future<Database> dbFuture = databaseHelper.initializeDatabase();
+    dbFuture.then((database) {
+      Future<List<Note>> noteListFuture = databaseHelper.getNoteList();
+      noteListFuture.then((noteList) {
+        setState(() {
+          this.noteList = noteList;
+          this.count = noteList.length;
+        });
+      });
+    });
+  }
+}
 
 class NoteDetail extends StatefulWidget {
   final String appBarTitle;
@@ -20,7 +124,7 @@ class NoteDetail extends StatefulWidget {
 class NoteDetailState extends State<NoteDetail> {
   static var _priorities = ['Current', 'Savings', 'Salary'];
 
-  DatabaseHelper helper = DatabaseHelper();
+  DatabaseEquity helper = DatabaseEquity();
 
   String appBarTitle;
   Note note;
@@ -32,6 +136,7 @@ class NoteDetailState extends State<NoteDetail> {
   TextEditingController updateDateController = TextEditingController();
   TextEditingController amountController = TextEditingController();
   TextEditingController taxesController = TextEditingController();
+  TextEditingController rowController = TextEditingController();
 
   NoteDetailState(this.note, this.appBarTitle);
 
@@ -175,6 +280,24 @@ class NoteDetailState extends State<NoteDetail> {
                             borderRadius: BorderRadius.circular(5.0))),
                   ),
                 ),
+                //eight element
+                //no of rows needed
+                Padding(
+                  padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: rowController,
+                    style: textStyle,
+                    onChanged: (value) {
+                      debugPrint('Something changed in rows Text Field');
+                    },
+                    decoration: InputDecoration(
+                        labelText: 'No.of Rows',
+                        labelStyle: textStyle,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5.0))),
+                  ),
+                ),
 
                 Padding(
                   padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
@@ -299,10 +422,12 @@ class NoteDetailState extends State<NoteDetail> {
                 child: CircularProgressIndicator(),
               ));
       // Case 2: Insert Operation
-      for (int i = 1; i <= 100; i++) {
-        print(i);
+      print(DateTime.now());
+      for (int i = 1; i <= int.parse(rowController.text); i++) {
+        // print(i);
         result = await helper.insertNote(note);
       }
+      print(DateTime.now());
       Navigator.pop(context, true);
       moveToLastScreen();
     }

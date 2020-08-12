@@ -4,11 +4,11 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:sql_trial/models/note.dart';
 
-class DatabaseHelper {
-  static DatabaseHelper _databaseHelper; // Singleton DatabaseHelper
+class DatabaseExpense {
+  static DatabaseExpense _databaseExpense; // Singleton DatabaseExpense
   static Database _database; // Singleton Database
 
-  String noteTable = 'note_table';
+  String noteTable = 'expense_table';
   String colId = 'id';
   String colTitle = 'title';
   String colAccountType = 'accountType';
@@ -19,14 +19,14 @@ class DatabaseHelper {
   String colAmount = 'amount';
   String colTaxes = 'taxes';
 
-  DatabaseHelper._createInstance(); // Named constructor to create instance of DatabaseHelper
+  DatabaseExpense._createInstance(); // Named constructor to create instance of DatabaseExpense
 
-  factory DatabaseHelper() {
-    if (_databaseHelper == null) {
-      _databaseHelper = DatabaseHelper
+  factory DatabaseExpense() {
+    if (_databaseExpense == null) {
+      _databaseExpense = DatabaseExpense
           ._createInstance(); // This is executed only once, singleton object
     }
-    return _databaseHelper;
+    return _databaseExpense;
   }
 
   Future<Database> get database async {
@@ -49,7 +49,17 @@ class DatabaseHelper {
 
   void _createDb(Database db, int newVersion) async {
     await db.execute(
-        'CREATE TABLE $noteTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colTitle TEXT, $colDescription TEXT, $colAccountType TEXT, $colCurrency TEXT, $colinsertDate INTEGER, $colupdateDate TEXT, $colAmount TEXT, $colTaxes TEXT)');
+        'CREATE TABLE bank_table($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colTitle TEXT, $colDescription TEXT, $colAccountType TEXT, $colCurrency TEXT, $colinsertDate INTEGER, $colupdateDate TEXT, $colAmount TEXT, $colTaxes TEXT)');
+    await db.execute(
+        'CREATE TABLE assets_table($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colTitle TEXT, $colDescription TEXT, $colAccountType TEXT, $colCurrency TEXT, $colinsertDate INTEGER, $colupdateDate TEXT, $colAmount TEXT, $colTaxes TEXT)');
+    await db.execute(
+        'CREATE TABLE ecaps_table($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colTitle TEXT, $colDescription TEXT, $colAccountType TEXT, $colCurrency TEXT, $colinsertDate INTEGER, $colupdateDate TEXT, $colAmount TEXT, $colTaxes TEXT)');
+    await db.execute(
+        'CREATE TABLE equity_table($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colTitle TEXT, $colDescription TEXT, $colAccountType TEXT, $colCurrency TEXT, $colinsertDate INTEGER, $colupdateDate TEXT, $colAmount TEXT, $colTaxes TEXT)');
+    await db.execute(
+        'CREATE TABLE expense_table($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colTitle TEXT, $colDescription TEXT, $colAccountType TEXT, $colCurrency TEXT, $colinsertDate INTEGER, $colupdateDate TEXT, $colAmount TEXT, $colTaxes TEXT)');
+    await db.execute(
+        'CREATE TABLE liabilities_table($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colTitle TEXT, $colDescription TEXT, $colAccountType TEXT, $colCurrency TEXT, $colinsertDate INTEGER, $colupdateDate TEXT, $colAmount TEXT, $colTaxes TEXT)');
   }
 
   // Fetch Operation: Get all note objects from database

@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:sql_trial/screens/note_list.dart';
+import 'package:sql_trial/screens/home.dart';
 
 
 void main() {
-	runApp(MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-
-	@override
+  @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
-	    title: 'NoteKeeper',
-	    debugShowCheckedModeBanner: false,
-	    theme: ThemeData(
-		    primarySwatch: Colors.deepPurple
-	    ),
-	    home: NoteList(),
+      title: 'NoteKeeper',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.deepPurple),
+      home: Home(),
+      // home: NoteList(),
     );
   }
 }
